@@ -1,0 +1,162 @@
+/* Thẻ chứa form */
+body {
+    background-color: #3c0ff2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Login card chính giữa */
+.login-card {
+    width: 380px;
+    background: white;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 15px 40px 40px;
+    text-align: center;
+}
+
+
+/* Logo ở trên cùng */
+.login-logo {
+    width: 150px;
+    display: flex;
+    margin: 0 auto 16px;
+}
+
+/* Bọc nội dung chính */
+.wrapper {
+    background-color: #f4f3f8;
+    width: 100%;
+    padding: 30px 5px 40px;
+}
+
+/* Tiêu đề */
+h2 {
+    font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 22px;
+    color: #222;
+}
+
+/* Label Email */
+label {
+    display: block;
+    text-align: left;
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 6px;
+    margin-left: 15px;
+}
+
+/* Ô nhập email */
+input[type='email'] {
+    width: 88%;
+    padding: 10px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    text-align: left;
+}
+
+input[type='email']:focus {
+    border-color: #4b6cff;
+}
+
+/* Nút tiếp tục */
+button[type='submit'] {
+    /* width: 100%; */
+    background-color: #2b3fff;
+    color: white;
+    border: none;
+    padding: 10px 150px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+button[type='submit']:hover {
+    background-color: #202ecc;
+}
+
+/* Dòng chữ “Hoặc” */
+.divider {
+    position: relative;
+    margin: 22px 0 18px;
+    font-size: 14px;
+    color: #888;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e2dada;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+/* Các nút mạng xã hội */
+.social-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1px;
+    width: 100%;
+}
+
+.social-buttons button {
+    flex: 1;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 6px;
+    padding: 8px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+
+
+.social-buttons button img {
+    width: 18px;
+    height: 18px;
+}
+
+/* Dòng điều khoản */
+.terms {
+    font-size: 11px;
+    color: #777;
+    margin-top: 20px;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.terms {
+    font-size: 11px;
+    color: #777;
+    margin: 0px;
+    margin-top: 100px;
+    line-height: 1.4;
+    text-align: center;
+}
