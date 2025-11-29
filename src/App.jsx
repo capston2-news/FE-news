@@ -10,6 +10,7 @@ import Article from './components/Article/Article'
 import MainLayout from './components/homePage/Content/MainLayout'
 import ScrollToTop from './components/utils/ScrollToTop'
 import Loading from './components/utils/Loading'
+import AdminDashboard from './components/Admin/AdminDashboard'
 
 function App() {
 
@@ -17,13 +18,14 @@ function App() {
     <>
       <BrowserRouter>
         <ScrollToTop />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/" element={<MainLayout />} />
-            <Route path="/article/:id" element={<Article />} />
-            <Route path="/loading" element={<Loading />} />
-          </Routes>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<MainLayout />} />
+          <Route path="/article/:id" element={<Article />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/loading" element={<Loading />} />
+        </Routes>
       </BrowserRouter>
     </>
   )
