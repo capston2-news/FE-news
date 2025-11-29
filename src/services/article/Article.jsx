@@ -55,3 +55,17 @@ export const getArticleExpectArticleId = async (id) => {
         return [];
     }
 };
+
+export const handleTextToSpeech = async (data) => {
+    try {
+        const res = await axios.post(`/api/article/text/sound`, data, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error in text-to-speech request", error);
+        return null;
+    }
+};
