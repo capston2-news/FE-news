@@ -81,7 +81,6 @@ const Header = () => {
             <span className="text-gray-300">|</span>
             <span className="text-gray-500 text-xs">Thứ hai, 2/12/2025</span>
           </div>
-          </div>
 
           {/* RIGHT: icons */}
           <div className="flex items-center gap-4">
@@ -155,69 +154,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-                        <div className="h-px bg-slate-100 my-1" />
-                        <button
-                          type="button"
-                          className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
-                          onClick={handleLogout}
-                        >
-   <span className="flex items-center gap-2">
-    <span>Đăng xuất</span>
-    {/* ICON ĐĂNG XUẤT TỰ VẼ */}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* Khung cửa */}
-      <path d="M5 3h7a2 2 0 0 1 2 2v3" />
-      <path d="M5 21h7a2 2 0 0 0 2-2v-3" />
-      <path d="M5 3v18" />
-
-      {/* Mũi tên đi ra */}
-      <path d="M13 12h6" />
-      <path d="M17 8l4 4-4 4" />
-    </svg>
-
-    
-  </span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <NavLink to="/login" className="cursor-pointer">
-                    Đăng nhập
-                  </NavLink>
-                )}
-              </a>
-
-              {/* Bell */}
-              <button className="hover:text-gray-800">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M15 17H9a3 3 0 01-3-3V10a6 6 0 1112 0v4a3 3 0 01-3 3z" />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10 17a2 2 0 004 0"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ----- MAIN NAV BAR ----- */}
       <nav className="border-t border-gray-100 bg-white">
@@ -264,7 +200,6 @@ const Header = () => {
           ))}
         </div>
       )}
-
     </header>
   );
 };
