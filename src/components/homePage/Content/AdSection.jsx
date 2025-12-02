@@ -1,11 +1,11 @@
 import React from 'react';
-import img from '../../../../public/banner.png';
 
 const AdSection = () => {
     return (
         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+            {/* Use public asset by URL to avoid importing from /public */}
             <img
-                src={img}
+                src="/banner.png"
                 alt="Quảng cáo"
                 className="w-full h-auto object-cover"
             />
