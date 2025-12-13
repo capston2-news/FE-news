@@ -21,6 +21,7 @@ const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
 
   const handleLogout = async () => {
     await logout();
@@ -28,6 +29,12 @@ const Header = () => {
     setOpenUserMenu(false);
     navigate("/"); // quay về trang chủ sau khi đăng xuất
   };
+
+  useEffect(() => {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
+    setCurrentDate(now.toLocaleDateString('vi-VN', options));
+  }, []);
 
   const scrollRef = useRef(null);
 
@@ -79,7 +86,7 @@ const Header = () => {
               <span>24°</span>
             </div>
             <span className="text-gray-300">|</span>
-            <span className="text-gray-500 text-xs">Thứ hai, 2/12/2025</span>
+            <span className="text-gray-500 text-xs">{currentDate}</span>
           </div>
 
           {/* RIGHT: icons */}
