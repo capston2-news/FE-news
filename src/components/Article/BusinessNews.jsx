@@ -9,7 +9,7 @@ const BusinessNews = () => {
                 <div className="flex-1">
                     <h3 className="font-semibold text-gray-800 leading-tight">Vàng miếng gần 144 triệu đồng một lượng</h3>
                     <p className="text-sm text-gray-600 mt-1">
-                        Các thương hiệu bán ra vàng miếng tại 143.8 triệu đồng một lượng, tăng 800.000 đồng so với cuối tuần trước và cùng chiều đi lên với giá thế giới.
+                        Các thương hiệu bán ra vàng miếng tại 143.8 triệu đồng một lượng,tăng 800.000 đồng so với cuối tuần trước và cùng chiều đi lên với giá thế giới.
                     </p>
                     <div className="text-xs text-gray-500 mt-2">
                         29 trước | Kinh doanh
