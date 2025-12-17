@@ -134,3 +134,49 @@
     padding: 0.5rem 0;
     border-bottom: 1px solid #f3f4f6
 }
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-actions .username {
+    font-weight: 600;
+    color: #111827;
+}
+
+.admin-actions .link {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .admin-body {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0.75rem;
+    }
+
+    .admin-main {
+        padding: 0.75rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-header {
+        padding: 0.75rem;
+    }
+}

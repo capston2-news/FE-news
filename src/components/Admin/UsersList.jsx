@@ -16,8 +16,13 @@ const UsersList = ({ users = [], onDelete }) => {
                         </div>
 
                         <div className="user-actions">
-                            <button className="btn small">Edit</button>
-                            <button className="btn small danger" onClick={() => onDelete && onDelete(u.id)}>Remove</button>
+                            <select value={u.role} onChange={(e) => onChangeRole && onChangeRole(u.id, e.target.value)} style={{ padding: '6px 8px', borderRadius: 6 }}>
+                                <option value="admin">admin</option>
+                                <option value="editor">editor</option>
+                                <option value="author">author</option>
+                                <option value="user">user</option>
+                            </select>
+                            <button className="btn small danger" onClick={() => onDelete && onDelete(u.id)} style={{ marginLeft: 8 }}>Remove</button>
                         </div>
                     </li>
                 ))}

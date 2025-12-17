@@ -24,6 +24,11 @@ const AdminDashboard = () => {
     const [selectedArticle, setSelectedArticle] = useState(null)
     const [view, setView] = useState('dashboard') // 'dashboard' | 'articles' | 'users' | 'editor'
 
+    // article list controls
+    const [search, setSearch] = useState('')
+    const [page, setPage] = useState(1)
+    const perPage = 5
+
     const handleDeleteArticle = (id) => {
         setArticles(prev => prev.filter(a => a.id !== id))
     }
@@ -43,7 +48,20 @@ const AdminDashboard = () => {
         setUsers(prev => prev.filter(u => u.id !== id))
     }
 
+    const handleChangeUserRole = (id, role) => {
+        setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
+    }
+
     const totalViews = useMemo(() => articles.reduce((s, a) => s + (a.views || 0), 0), [articles])
+
+    const filteredArticles = useMemo(() => {
+        const q = search.trim().toLowerCase()
+        if (!q) return articles
+        return articles.filter(a => a.title.toLowerCase().includes(q) || (a.author || '').toLowerCase().includes(q))
+    }, [articles, search])
+
+    const totalPages = Math.max(1, Math.ceil(filteredArticles.length / perPage))
+    const paginatedArticles = filteredArticles.slice((page - 1) * perPage, page * perPage)
 
     return (
         <div className="admin-root">
@@ -87,7 +105,26 @@ const AdminDashboard = () => {
                     )}
 
                     {view === 'articles' && (
-                        <ArticleList articles={articles} onEdit={(a) => { setSelectedArticle(a); setView('editor') }} onDelete={handleDeleteArticle} />
+                        <>
+                            <div className="flex-between" style={{ marginBottom: 12 }}>
+                                <h2>Articles</h2>
+                                <div>
+                                    <input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} placeholder="Search title or author" style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+                                    <button onClick={() => { setSearch(''); setPage(1) }} className="btn small" style={{ marginLeft: 8 }}>Clear</button>
+                                </div>
+                            </div>
+
+                            <ArticleList articles={paginatedArticles} onEdit={(a) => { setSelectedArticle(a); setView('editor') }} onDelete={handleDeleteArticle} />
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                                <div className="muted">Showing {filteredArticles.length} result(s)</div>
+                                <div>
+                                    <button className="btn small" onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}>Prev</button>
+                                    <span style={{ margin: '0 8px' }}>{page} / {totalPages}</span>
+                                    <button className="btn small" onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}>Next</button>
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {view === 'editor' && (
@@ -95,7 +132,7 @@ const AdminDashboard = () => {
                     )}
 
                     {view === 'users' && (
-                        <UsersList users={users} onDelete={handleDeleteUser} />
+                        <UsersList users={users} onDelete={handleDeleteUser} onChangeRole={handleChangeUserRole} />
                     )}
                 </main>
             </div>

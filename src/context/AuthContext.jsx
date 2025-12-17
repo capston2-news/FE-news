@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
 
   const login = (data) => {
     // data từ BE: { username, role, ... }
-    const u = { username: data.username};
+    const u = { username: data.username, role: data.role || 'user' };
     setUser(u);
     localStorage.setItem("auth_user", JSON.stringify(u));
   };

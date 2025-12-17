@@ -52,13 +52,26 @@ export default function Login() {
     }
 
     const data = await login(account);
-    if (!data || data.message !== "ok") {
+    if (!data) {
       setLoginError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
       return;
     }
 
+    // Hỗ trợ nhiều dạng response: { message: 'ok', user: {...} } hoặc { username, role }
+    if (data.message && data.message !== "ok") {
+      setLoginError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+      return;
+    }
+
+    const userPayload = data.user || data;
+    if (!userPayload.username) {
+      // Nếu dữ liệu user không kèm thông tin username, coi là lỗi
+      setLoginError("Đăng nhập thành công nhưng dữ liệu người dùng thiếu.");
+      return;
+    }
+
     // Lưu user vào context + localStorage
-    setAuthUser(data);
+    setAuthUser(userPayload);
     navigate("/");
   };
 

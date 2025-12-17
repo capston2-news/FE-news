@@ -11,6 +11,7 @@ import MainLayout from './components/homePage/Content/MainLayout'
 import ScrollToTop from './components/utils/ScrollToTop'
 import Loading from './components/utils/Loading'
 import AdminDashboard from './components/Admin/AdminDashboard'
+import RequireAdmin from './components/routes/RequireAdmin'
 
 function App() {
 
@@ -23,7 +24,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<MainLayout />} />
           <Route path="/article/:id" element={<Article />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
           <Route path="/loading" element={<Loading />} />
         </Routes>
       </BrowserRouter>
