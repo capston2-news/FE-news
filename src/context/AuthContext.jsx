@@ -8,7 +8,10 @@ export function AuthProvider({ children }) {
 
   const login = (data) => {
     // data từ BE: { username, role, ... }
-    const u = { username: data.username};
+    const u = { 
+      username: data.username,
+      role: data.role
+    };
     setUser(u);
     localStorage.setItem("auth_user", JSON.stringify(u));
   };
@@ -26,7 +29,7 @@ export function AuthProvider({ children }) {
       try {
         setUser(JSON.parse(saved));
       } catch {
-        // ignore
+        setUser(null);
       }
     }
   }, []);

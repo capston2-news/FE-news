@@ -1,6 +1,8 @@
 import axios from "axios";
 
 export const login = async (account) => {
+  console.log(account);
+  
   try {
     const res = await axios.post("/api/auth/login/", account, {
       withCredentials: true, // để browser nhận cookies access/refresh/role
