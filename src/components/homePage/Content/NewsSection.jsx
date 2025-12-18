@@ -1,111 +1,82 @@
 import React, { useEffect, useState } from 'react';
 
-const NewsSection = () => {
+const NewsSection = ({ articles = [] }) => {
 
-    return (
-        <div className="space-y-6">
-            {/* Khối tin tức nổi bật trên cùng */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-4">
-                {/* Hình ảnh chính (chiếm 2/3) */}
-                <div className="md:col-span-2">
-                    <img
-                        src="https://i1-kinhdoanh.vnecdn.net/2025/10/09/xang39-1759991662-1759991673-9511-1759991728.jpg?w=680&h=408&q=100&dpr=2&fit=crop&s=YOaPRcUIlZ9fYObVWx81GA"
-                        alt="Giá xăng dầu"
-                        className="w-full h-auto object-cover "
-                    />
+  // hero: first article
+  const hero = articles[0];
+  const featured = articles.slice(1, 4); // three cards
 
+  return (
+    <div className="space-y-6">
+      {/* Hero */}
+      {hero && (
+          <section role="region" aria-labelledby="hero-heading" className="relative bg-white rounded-lg overflow-hidden shadow-sm">
+            <div className="w-full h-[320px] sm:h-[360px] md:h-[420px] relative">
+              <div className="absolute inset-0 bg-gray-100" aria-hidden="true" />
+              <img
+                src={hero.images}
+                alt={hero.title}
+                loading="lazy"
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden="true" />
+              <div className="absolute bottom-6 left-4 right-4 text-white">
+                <div className="inline-block bg-white/10 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold">Tin nổi bật</div>
+                <h2 id="hero-heading" className="mt-3 text-2xl sm:text-3xl md:text-4xl font-bold leading-tight drop-shadow">{hero.title}</h2>
+                <p className="mt-2 max-w-2xl text-sm sm:text-base text-white/95">{hero.content?.slice(0, 180) || hero.summary || ''}</p>
+                <div className="mt-4">
+                  <button aria-label={`Đọc tiếp: ${hero.title}`} className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Đọc tiếp</button>
                 </div>
-
-                {/* Tóm tắt tin tức (chiếm 1/3) */}
-                <div className="md:col-span-1 pt-0">
-                    <p className="font-semibold text-black text-2xl leading-tight text-left">
-                        Giá xăng xuống dưới 20.000 đồng một lít
-                    </p>
-                    <p className="mt-2 text-base text-black  text-left">
-                        Giá xăng, dầu giảm 430-570 đồng một lít,kg từ 15h hôm nay, sau điều chỉnh của liên Bộ Công
-                        Thương - Tài chính.
-                    </p>
-                    <p className="mt-2 text-base text-black  text-left">
-                        Giá xăng, dầu giảm 430-570 đồng một lít,kg từ 15h hôm nay, sau điều chỉnh của liên Bộ Công
-                        Thương - Tài chính.
-                    </p>
-                    <div className="flex items-center gap-2 mt-4 text-gray-500 text-sm">
-                        <span>2h trước</span>
-                        <span className="font-bold">Kinh doanh</span>
-                        <span className="text-gray-300 ml-auto">|</span>
-                        <div className="flex items-center gap-1">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-                                />
-                            </svg>
-                            <span>18</span>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-            <hr className="w-full h-px my-4 bg-gray-200 border-0"/>
-
-            {/* Khối tin tức phụ bên dưới */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Tin phụ 1 */}
-                <article className="flex-1 bg-white  overflow-hidden flex flex-col">
-                    <div className="p-2">
-                        <h3 className="font-semibold text-gray-800 text-left text-[18px]">
-                            Lũ sông miền Bắc đã qua đỉnh, chiều ngày thu hẹp
-                        </h3>
-                    </div>
-                    <img
-                        src="https://i1-vnexpress.vnecdn.net/2025/10/09/ngap2-1759992062-1759992141-9279-1759992155.jpg?w=300&h=180&q=100&dpr=2&fit=crop&s=Rl2qDqhgqTxjYbYoBc3qfQ"
-                        alt="Lũ sông miền Bắc"
-                        className="w-full h-auto object-cover mt-auto"
-                    />
-                </article>
-
-                {/* Article 2 */}
-                <article className="flex-1 bg-white  overflow-hidden flex flex-col text-left text-[18px] ">
-                    <div className="p-2">
-                        <h3 className="font-semibold text-gray-800">
-                            Phó thủ tướng: Tư nhân sẽ đảm nhiều chức vụ quan trọng
-                        </h3>
-                    </div>
-                    <img
-                        src="https://i1-vnexpress.vnecdn.net/2025/10/09/gen-h-z7021600758271df4b4c2f7f-3228-3794-1759989337.jpg?w=300&h=180&q=100&dpr=2&fit=crop&s=rMmtUwcPV1vLcjlRbR9j7g"
-                        alt="Phó thủ tướng"
-                        className="w-full h-auto object-cover mt-auto"
-                    />
-                </article>
-
-
-                {/* Tin phụ 3 */}
-                <article className="bg-white  p-4">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold text-gray-800">Góc nhìn</h3>
-                        <span className="text-xs text-blue-500">22</span>
-                    </div>
-                    <h3 className="font-semibold text-black text-[18px] leading-tight text-left mt-1">
-                        Sinh tồn trong lũ
-                    </h3>
-                    <p className="mt-2 text-base text-black  text-left">
-                        Không quốc gia nào phản ứng hoàn hảo trước khủng hoảng, và các sáng kiến nhỏ của cộng đồng có
-                        thể làm nên kỳ tích.
-                    </p>
-                </article>
-
+          </section>
+        )}
+      {/* Featured grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {featured.map((art, idx) => (
+          <article key={idx} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition" role="article" aria-label={art.title} tabIndex={0}>
+            {art.images ? (
+              <div className="w-full h-40 bg-gray-100 overflow-hidden">
+                <img src={art.images} alt={art.title} loading="lazy" className="w-full h-full object-cover" onError={(e)=>{e.currentTarget.style.display='none'}} />
+              </div>
+            ) : (
+              <div className="w-full h-40 bg-gray-200 animate-pulse rounded" aria-hidden="true" />
+            )}
+            <div className="p-4">
+              <div className="text-sm text-gray-500">{art.category || 'Tin'}</div>
+              <h3 className="mt-2 font-semibold text-gray-900 text-lg group-hover:text-blue-600">{art.title}</h3>
+              <p className="mt-2 text-sm text-gray-600">{art.content?.slice(0, 120) || ''}</p>
+              <div className="mt-3">
+                <a href={`#`} className="text-blue-600 font-semibold inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded">Đọc thêm →</a>
+              </div>
             </div>
-            <hr className="w-full h-px my-4 bg-gray-200 border-0"/>
-        </div>
-    )
-        ;
+          </article>
+        ))}
+      </div>
+
+      <hr className="w-full h-px my-4 bg-gray-200 border-0" />
+
+      {/* Secondary list: render next articles */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {articles.slice(4, 10).map((a, i) => (
+          <article key={i} className="flex flex-col bg-white rounded-lg overflow-hidden shadow-sm">
+            {a.images ? (
+              <div className="w-full h-40 bg-gray-100 overflow-hidden">
+                <img src={a.images} alt={a.title} loading="lazy" className="w-full h-full object-cover" onError={(e)=>{e.currentTarget.style.display='none'}} />
+              </div>
+            ) : (
+              <div className="w-full h-40 bg-gray-200 animate-pulse rounded" aria-hidden="true" />
+            )}
+            <div className="p-4">
+              <div className="text-sm text-gray-500">{a.category || 'Tin'}</div>
+              <h4 className="mt-2 font-semibold text-gray-900">{a.title}</h4>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default NewsSection;

@@ -1,7 +1,24 @@
 import { useNavigate } from "react-router-dom";
+import Skeleton from '../../utils/Skeleton.jsx';
 
-const Section = ({ id, title, image, summary }) => {
+const Section = ({ id, title, image, summary, loading = false }) => {
     const navigate = useNavigate();
+
+    if (loading || (!title && !summary && !image)) {
+        return (
+            <article className="bg-white overflow-hidden border-b border-gray-200 pb-4" aria-busy="true">
+                <div className="mb-3"><Skeleton className="w-3/4 h-6"/></div>
+                <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0"><Skeleton className="w-48 h-32"/></div>
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="w-full h-4"/>
+                        <Skeleton className="w-5/6 h-4"/>
+                        <Skeleton className="w-2/3 h-4"/>
+                    </div>
+                </div>
+            </article>
+        );
+    }
 
     const handleClick = () => {
         navigate(`/article/${id}`);

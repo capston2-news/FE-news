@@ -7,8 +7,7 @@ import ScheduleFootball from "./ScheduleFootball.jsx";
 import NewsCategory from './NewsCategory.jsx';
 import Navbar from '../Science/Navbar.jsx';
 import MainContent from '../Science/MainContent.jsx';
-import Header from '../../Header/Header.jsx';
-import Footer from '../../Footer/Footer.jsx';
+
 import { getAllArticle } from '../../../services/article/Article.jsx';
 import Loading from '../../utils/Loading.jsx';
 
@@ -142,11 +141,10 @@ const MainLayout = () => {
     }
 
     return (
-            <main className="container max-w-7xl px-2 py-6 mt-24 mx-auto">
-                <Header/>
+            <main id="main" aria-label="Nội dung chính" className="container max-w-7xl px-2 py-6 mt-24 mx-auto">
                 <div className="grid grid-cols-4 gap-6 pt-4">
                     <div className="col-span-3">
-                        <NewsSection/>
+                        <NewsSection articles={articles} />
                     </div>
                     <div className="col-span-1">
                         <AdSection/>
@@ -188,7 +186,6 @@ const MainLayout = () => {
                    <Navbar/>
                    <MainContent/>
                </div>
-<Footer/>
             </main>
 
             );
