@@ -34,7 +34,7 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white z-50 border-b border-gray-200">
+    <header className="fixed top-0 left-0 w-full bg-[#071127] text-[#E6EEF3] z-50 border-b border-[#111827]">
       {/* ----- TOP BAR ----- */}
       <div className="h-14 flex items-center">
         <div className="max-w-[1270px] mx-auto w-full flex items-center justify-between px-2">
@@ -186,10 +186,10 @@ const Header = () => {
 
                     {/* Dropdown menu */}
                     {openUserMenu && (
-                      <div className="absolute right-0 w-44 rounded-xl bg-white border border-slate-200 shadow-lg py-1 text-sm z-20">
+                      <div className="absolute right-0 w-44 rounded-xl bg-[#0F1724] border border-[#1f2937] shadow-lg py-1 text-sm z-20">
                         <button
                           type="button"
-                          className="w-full text-left px-3 py-2 hover:bg-slate-50 cursor-pointer"
+                          className="w-full text-left px-3 py-2 hover:bg-[#111827] cursor-pointer text-[#E6EEF3]"
                           onClick={() => {
                             // TODO: chuyển đến trang thông tin tài khoản nếu có
                             // ví dụ: navigate("/profile");
@@ -198,10 +198,10 @@ const Header = () => {
                         >
                           Thông tin tài khoản
                         </button>
-                        <div className="h-px bg-slate-100 my-1" />
+                        <div className="h-px bg-[#111827] my-1" />
                         <button
                           type="button"
-                          className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
+                          className="w-full text-left px-3 py-2 text-red-500 hover:bg-[#3b0f0f] cursor-pointer"
                           onClick={handleLogout}
                         >
    <span className="flex items-center gap-2">
@@ -263,13 +263,13 @@ const Header = () => {
       </div>
 
       {/* ----- MAIN NAV (THANH DƯỚI) ----- */}
-    <div className="h-16 flex items-center border-t border-gray-200 bg-white">
+    <div className="h-16 flex items-center border-t border-[#0f1724] bg-[#071127]">
       <div className="max-w-[1800px] mx-auto w-full flex items-center justify-between px-4">
 
         {/* Nút trái */}
         <button
           onClick={scrollLeft}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-600 cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#0F1724] text-[#9AA9B8] cursor-pointer"
         >
           <ChevronLeft size={20} />
         </button>
@@ -277,7 +277,7 @@ const Header = () => {
         {/* Thanh menu scrollable */}
         <nav
           ref={scrollRef}
-          className="flex items-center gap-5 overflow-x-auto scrollbar-hide text-[16px] text-gray-700 px-2"
+          className="flex items-center gap-5 overflow-x-auto scrollbar-hide text-[16px] text-[#9AA9B8] px-2"
         >
           <NavLink to="/" className="hover:text-gray-400 transition">
             <Home size={20} />
@@ -305,7 +305,7 @@ const Header = () => {
             <a
               key={item}
               href="#"
-              className="whitespace-nowrap hover:text-gray-400 transition"
+              className="whitespace-nowrap hover:text-[#E6EEF3] transition"
             >
               {item}
             </a>
@@ -315,7 +315,7 @@ const Header = () => {
         {/* Nút phải */}
         <button
           onClick={scrollRight}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-600 cursor-pointer"
+          className="p-2 rounded-full hover:bg-[#0F1724] text-[#9AA9B8] cursor-pointer"
         >
           <ChevronRight size={20} />
         </button>

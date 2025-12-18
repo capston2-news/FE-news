@@ -6,3 +6,13 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;             /* Chrome, Safari, Opera */
 }
+
+/* Dark header helpers */
+.header-glass {
+  background: linear-gradient(180deg, rgba(11,18,32,0.6), rgba(11,18,32,0.4));
+  backdrop-filter: blur(6px);
+}
+
+.header-link:hover {
+  color: #E6EEF3;
+}
