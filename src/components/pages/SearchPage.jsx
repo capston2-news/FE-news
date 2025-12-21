@@ -1,25 +1,21 @@
-// src/components/home/MainFeed.jsx
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+// src/pages/SearchArticlesPage.jsx
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
-import { getAllArticles } from "../../services/article/ArticleService";
 import { AddBookmark, RemoveBookmark } from "../../services/bookmark/BookmarkService";
-import { IncreseArticleViewCount } from "../../services/article/ArticleService";
-import { getArticleByRecommend } from "../../services/recommend/RecommendService";
 
-const PAGE_SIZE = 20;
+import {
+  IncreseArticleViewCount,
+  searchArticlesByKeyword,
+} from "../../services/article/ArticleService";
+
+const PAGE_SIZE = 10;
 const PAGE_WINDOW = 10;
 const SCROLL_OFFSET = 130;
 
+// ---------- helpers ----------
 const buildPageWindow = (current, total, windowSize = PAGE_WINDOW) => {
   if (total <= 0) return [];
   const half = Math.floor(windowSize / 2);
@@ -86,7 +82,46 @@ const normalizeApiArticle = (a) => {
   };
 };
 
-// Card 1 bài trong danh sách
+// ---------- Highlight keyword (bôi đen như ảnh) ----------
+const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const Highlight = ({ text, query }) => {
+  const raw = String(text ?? "");
+  const q = String(query ?? "").trim();
+  if (!q) return raw;
+
+  // nhiều từ thì highlight từng từ
+  const words = q.split(/\s+/).filter(Boolean).slice(0, 6);
+  if (!words.length) return raw;
+
+  const pattern = words
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join("|");
+
+  const re = new RegExp(`(${pattern})`, "gi");
+  const parts = raw.split(re);
+
+  return (
+    <>
+      {parts.map((p, i) => {
+        const hit = words.some((w) => p.toLowerCase() === w.toLowerCase());
+        if (!hit) return <React.Fragment key={i}>{p}</React.Fragment>;
+
+        return (
+          <mark
+            key={i}
+            className="bg-slate-700 text-white px-1 py-[1px] rounded-[2px]"
+          >
+            {p}
+          </mark>
+        );
+      })}
+    </>
+  );
+};
+
+// ---------- Card 1 bài trong danh sách ----------
 const FeedArticleCard = ({
   article,
   articleId,
@@ -94,6 +129,7 @@ const FeedArticleCard = ({
   showBookmark,
   isBookmarked,
   onToggleBookmark,
+  keyword,
 }) => {
   const {
     title,
@@ -154,7 +190,7 @@ const FeedArticleCard = ({
               <NavLink
                 to={`/category/${category_slug}`}
                 onClick={(e) => e.stopPropagation()}
-                className="font-semibold tracking-wide uppercase hover:text-sky-600"
+                className="font-semibold tracking-wide uppercase hover:text-sky-600 cursor-pointer"
               >
                 {category_name}
               </NavLink>
@@ -172,7 +208,7 @@ const FeedArticleCard = ({
                 <NavLink
                   to={`/category/${category_slug}/${category_child_slug}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="font-semibold tracking-wide uppercase hover:text-sky-600"
+                  className="font-semibold tracking-wide uppercase hover:text-sky-600 cursor-pointer"
                 >
                   {category_child_name}
                 </NavLink>
@@ -225,14 +261,15 @@ const FeedArticleCard = ({
         </div>
 
         <h3
-          className="text-[16px] md:text-[18px] font-semibold text-slate-900 leading-snug mb-1.5 hover:text-sky-600 cursor-pointer"
+          className="text-[16px] md:text-[18px] font-semibold text-slate-900 leading-snug mb-1.5 cursor-pointer"
           role="button"
           tabIndex={0}
           onClick={open}
           onKeyDown={onKeyOpen}
           title="Xem bài viết"
         >
-          {title || "Tiêu đề bài viết"}
+          {/* ✅ highlight keyword trong title */}
+          <Highlight text={title || "Tiêu đề bài viết"} query={keyword} />
         </h3>
 
         {displayDesc && (
@@ -260,96 +297,40 @@ const FeedArticleCard = ({
           >
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          {/* <span className="text-[12px]">{comments}</span> */}
+          <span className="text-[12px]">{comments}</span>
         </div>
       </div>
     </article>
   );
 };
 
-const MainFeed = ({ topics = [] }) => {
+export default function SearchArticlesPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
 
-  const canForYou = !!user;
+  const keyword = (params.get("key") || "").trim();
 
   const topRef = useRef(null);
   const scrollToTabs = () => {
     const el = topRef.current;
     if (!el) return;
-    const y = el.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
+    const y = el.getBoundingClient().top + window.pageYOffset - SCROLL_OFFSET;
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
-  // ✅ mặc định luôn newest (login lại vẫn newest)
-  const [activeTab, setActiveTab] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ nếu logout mà đang ở for-you -> về newest
-  useEffect(() => {
-    if (!canForYou && activeTab === "for-you") setActiveTab("newest");
-  }, [canForYou, activeTab]);
+  // data
+  const [rawApi, setRawApi] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // ====== underline moving effect ======
-  const tabsWrapRef = useRef(null);
-  const newestBtnRef = useRef(null);
-  const forYouBtnRef = useRef(null);
-
-  const [underline, setUnderline] = useState({ left: 0, width: 0, opacity: 0 });
-
-  const updateUnderline = useCallback(() => {
-    const activeEl =
-      activeTab === "newest" ? newestBtnRef.current : forYouBtnRef.current;
-
-    if (!activeEl) {
-      const fallback = newestBtnRef.current;
-      if (!fallback) return;
-      setUnderline({
-        left: fallback.offsetLeft,
-        width: fallback.offsetWidth,
-        opacity: 1,
-      });
-      return;
-    }
-
-    setUnderline({
-      left: activeEl.offsetLeft,
-      width: activeEl.offsetWidth,
-      opacity: 1,
-    });
-  }, [activeTab]);
-
-  useLayoutEffect(() => {
-    updateUnderline();
-  }, [updateUnderline, canForYou]);
-
-  useEffect(() => {
-    const onResize = () => updateUnderline();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [updateUnderline]);
-  // ====================================
-
-  // ===== data: newest =====
-  const [newestApi, setNewestApi] = useState([]);
-  const [loadingNewest, setLoadingNewest] = useState(false);
-  const [errorNewest, setErrorNewest] = useState("");
-
-  // ===== data: recommend (for-you) =====
-  const [recommendApi, setRecommendApi] = useState([]);
-  const [loadingRecommend, setLoadingRecommend] = useState(false);
-  const [errorRecommend, setErrorRecommend] = useState("");
-
-  // bookmark map (dùng chung cho cả 2 tab)
+  // bookmark map
   const [bookmarkByOid, setBookmarkByOid] = useState({});
 
-  const newestList = useMemo(() => newestApi.map(normalizeApiArticle), [newestApi]);
-  const forYouList = useMemo(
-    () => recommendApi.map(normalizeApiArticle),
-    [recommendApi]
-  );
+  const listAll = useMemo(() => rawApi.map(normalizeApiArticle), [rawApi]);
 
-  // merge bookmark flags từ list trả về API
   const mergeBookmarkFlags = useCallback((arr) => {
     if (!Array.isArray(arr) || arr.length === 0) return;
     const next = {};
@@ -361,81 +342,61 @@ const MainFeed = ({ topics = [] }) => {
     setBookmarkByOid((prev) => ({ ...prev, ...next }));
   }, []);
 
-  // load newest when active tab = newest
+  // load search result
   useEffect(() => {
-    const loadNewest = async () => {
-      setLoadingNewest(true);
-      setErrorNewest("");
+    const load = async () => {
+      if (!keyword) {
+        setRawApi([]);
+        setError("");
+        return;
+      }
+
+      setLoading(true);
+      setError("");
       try {
-        const res = await getAllArticles();
+        const res = await searchArticlesByKeyword(keyword);
+
         const list =
           Array.isArray(res) ? res :
           Array.isArray(res?.data) ? res.data :
           Array.isArray(res?.results) ? res.results :
           Array.isArray(res?.items) ? res.items :
           [];
-        setNewestApi(list);
+
+        setRawApi(list);
         mergeBookmarkFlags(list);
       } catch {
-        setErrorNewest("Không tải được danh sách Mới nhất.");
-        setNewestApi([]);
+        setError("Không tải được kết quả tìm kiếm.");
+        setRawApi([]);
       } finally {
-        setLoadingNewest(false);
+        setLoading(false);
       }
     };
 
-    if (activeTab === "newest" && newestApi.length === 0 && !loadingNewest) {
-      loadNewest();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+    load();
+  }, [keyword, mergeBookmarkFlags]);
 
-  // load recommend when active tab = for-you
-  useEffect(() => {
-    const loadRecommend = async () => {
-      if (!canForYou) return;
-
-      setLoadingRecommend(true);
-      setErrorRecommend("");
-      try {
-        const res = await getArticleByRecommend();
-        const list =
-          Array.isArray(res) ? res :
-          Array.isArray(res?.data) ? res.data :
-          Array.isArray(res?.results) ? res.results :
-          Array.isArray(res?.items) ? res.items :
-          [];
-        setRecommendApi(list);
-        mergeBookmarkFlags(list);
-      } catch {
-        setErrorRecommend("Không tải được danh sách Dành cho bạn.");
-        setRecommendApi([]);
-      } finally {
-        setLoadingRecommend(false);
-      }
-    };
-
-    if (activeTab === "for-you" && canForYou && recommendApi.length === 0 && !loadingRecommend) {
-      loadRecommend();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, canForYou]);
-
-  const listBase = activeTab === "newest" ? newestList : forYouList;
-  const totalPages = Math.max(1, Math.ceil(listBase.length / PAGE_SIZE));
-
+  // reset page + scroll khi keyword đổi
   useEffect(() => {
     setCurrentPage(1);
     requestAnimationFrame(scrollToTabs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [keyword]);
+
+  // pagination
+  const totalPages = Math.max(1, Math.ceil(listAll.length / PAGE_SIZE));
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [totalPages, currentPage]);
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const currentList = listBase.slice(startIndex, startIndex + PAGE_SIZE);
+  const currentList = listAll.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const pages = useMemo(
+    () => buildPageWindow(currentPage, totalPages, PAGE_WINDOW),
+    [currentPage, totalPages]
+  );
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
@@ -443,12 +404,7 @@ const MainFeed = ({ topics = [] }) => {
     requestAnimationFrame(scrollToTabs);
   };
 
-  const pages = useMemo(
-    () => buildPageWindow(currentPage, totalPages, PAGE_WINDOW),
-    [currentPage, totalPages]
-  );
-
-  // ✅ toggle bookmark dùng cho cả 2 tab
+  // toggle bookmark
   const handleToggleBookmark = async (oid) => {
     if (!oid) return;
 
@@ -459,8 +415,6 @@ const MainFeed = ({ topics = [] }) => {
     }
 
     const prev = !!bookmarkByOid[oid];
-
-    // Optimistic UI
     setBookmarkByOid((m) => ({ ...m, [oid]: !prev }));
 
     const toastId = toast.loading(prev ? "Đang bỏ lưu..." : "Đang lưu bài...");
@@ -481,109 +435,72 @@ const MainFeed = ({ topics = [] }) => {
     }
   };
 
+  // open article + tăng view
   const openArticle = (articleId) => {
     if (!articleId) return;
     Promise.resolve(IncreseArticleViewCount(articleId)).catch(() => {});
     navigate(`/article/${articleId}`);
   };
 
-  const onClickTab = (next) => {
-    if (next === "for-you" && !canForYou) return;
-    setActiveTab(next);
-  };
-
   return (
-    <section className="max-w-6xl mx-auto px-4 pt-6 pb-10">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(260px,1fr)] gap-10">
-        <div>
-          {/* Tabs */}
-          <div
-            ref={(el) => {
-              topRef.current = el;
-              tabsWrapRef.current = el;
-            }}
-            className="relative scroll-mt-24 flex gap-6 text-sm font-semibold tracking-wide text-slate-600 uppercase border-b border-slate-200"
-          >
-            <button
-              ref={newestBtnRef}
-              type="button"
-              onClick={() => onClickTab("newest")}
-              className={`pb-2 relative cursor-pointer ${
-                activeTab === "newest" ? "text-slate-900" : "hover:text-slate-800"
-              }`}
-            >
-              Mới nhất
-            </button>
+    <section className="max-w-4xl mx-auto px-4 pt-8 pb-12">
+      <div ref={topRef} className="scroll-mt-24">
+        <h1 className="text-center text-3xl md:text-4xl font-extrabold text-slate-900">
+          Kết quả tìm kiếm:{" "}
+          <span className="italic font-extrabold">"{keyword || "..."}"</span>
+        </h1>
+      </div>
 
-            {canForYou && (
-              <button
-                ref={forYouBtnRef}
-                type="button"
-                onClick={() => onClickTab("for-you")}
-                className={`pb-2 relative cursor-pointer ${
-                  activeTab === "for-you" ? "text-slate-900" : "hover:text-slate-800"
-                }`}
-              >
-                Dành cho bạn
-              </button>
-            )}
+      <div className="mt-10 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200">
+          <div className="text-sm font-semibold text-slate-700">Bài viết</div>
+        </div>
 
-            {/* gạch dưới trượt qua lại */}
-            <span
-              className="absolute left-0 -bottom-[1px] h-[2px] bg-sky-500 rounded-full transition-all duration-300 ease-out"
-              style={{
-                width: `${underline.width}px`,
-                transform: `translateX(${underline.left}px)`,
-                opacity: underline.opacity,
-              }}
-            />
-          </div>
-
-          {/* Loading / Error theo tab */}
-          {activeTab === "newest" && loadingNewest && (
-            <div className="py-6 text-sm text-slate-500">Đang tải bài viết mới nhất…</div>
-          )}
-          {activeTab === "newest" && !loadingNewest && errorNewest && (
-            <div className="py-6 text-sm text-rose-600">{errorNewest}</div>
-          )}
-
-          {activeTab === "for-you" && loadingRecommend && (
-            <div className="py-6 text-sm text-slate-500">Đang tải bài viết dành cho bạn…</div>
-          )}
-          {activeTab === "for-you" && !loadingRecommend && errorRecommend && (
-            <div className="py-6 text-sm text-rose-600">{errorRecommend}</div>
-          )}
-
-          {/* Empty state cho for-you */}
-          {activeTab === "for-you" && !loadingRecommend && !errorRecommend && listBase.length === 0 && (
-            <div className="py-6 text-sm text-slate-500">
-              Chưa có gợi ý phù hợp cho bạn.
+        <div className="px-6">
+          {!keyword && (
+            <div className="py-10 text-center text-slate-500">
+              Nhập từ khóa để tìm kiếm.
             </div>
           )}
 
-          {/* List (cả 2 tab dùng chung render) */}
+          {keyword && loading && (
+            <div className="py-10 text-center text-slate-500">
+              Đang tải kết quả…
+            </div>
+          )}
+
+          {keyword && !loading && error && (
+            <div className="py-10 text-center text-rose-600">{error}</div>
+          )}
+
+          {keyword && !loading && !error && listAll.length === 0 && (
+            <div className="py-10 text-center text-slate-500">
+              Không tìm thấy bài viết nào.
+            </div>
+          )}
+
           <div>
             {currentList.map((item, idx) => {
-              const key = item?.oid || item?.title || `${startIndex + idx}`;
+              const keyRow = item?.oid || item?.title || `${startIndex + idx}`;
               const articleId = item?.oid || null;
 
               return (
                 <FeedArticleCard
-                  key={key}
+                  key={keyRow}
                   article={item}
                   articleId={articleId}
                   onOpenArticle={openArticle}
                   showBookmark={!!user}
                   isBookmarked={!!bookmarkByOid[item?.oid]}
                   onToggleBookmark={() => handleToggleBookmark(item?.oid)}
+                  keyword={keyword}
                 />
               );
             })}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-8 text-[15px] text-slate-700 select-none">
+          {keyword && !loading && !error && totalPages > 1 && (
+            <div className="mt-10 pb-10 flex items-center justify-center gap-8 text-[15px] text-slate-700 select-none">
               {currentPage > 1 ? (
                 <button
                   type="button"
@@ -631,35 +548,7 @@ const MainFeed = ({ topics = [] }) => {
             </div>
           )}
         </div>
-
-        {/* RIGHT topics */}
-        <aside className="lg:sticky lg:top-28 self-start">
-          <div className="px-3 py-3">
-            <h3 className="text-sm font-semibold tracking-wide text-slate-900 uppercase mb-4">
-              Chủ đề
-            </h3>
-
-            <div className="flex flex-wrap gap-3">
-              {topics.map((topic) => {
-                const slug = topic.slug || topic.id;
-                const label = topic.name || topic.label || "Chủ đề";
-
-                return (
-                  <Link
-                    key={slug}
-                    to={`/category/${slug}`}
-                    className="px-5 py-2 text-[14px] rounded-full border border-slate-300 bg-white text-slate-800 hover:border-sky-500 hover:text-sky-600 whitespace-nowrap"
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
   );
-};
-
-export default MainFeed;
+}

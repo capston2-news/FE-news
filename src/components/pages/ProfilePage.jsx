@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { articles } from "../../data";
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { logout as apiLogout } from "../../services/Auth";
+import { useAuth } from "../../context/AuthContext";
 
 import ProfileSidebar from "../profile/ProfileSidebar";
 import AccountPanel from "../profile/AccountPanel";
@@ -7,45 +9,100 @@ import SavedNewsPanel from "../profile/SavedNewsPanel";
 import SeenNewsPanel from "../profile/SeenNewsPanel";
 import EmptyPanel from "../profile/EmptyPanel";
 
-export default function ProfilePage() {
-  const user = useMemo(
-    () => ({
-      username: "nvp15072003",
-      joinedAt: "12/2025",
-      email: "nvp15072003@gmail.com",
-      name: "",
-      avatarLetter: "N",
-      birthday: "",
-      gender: "",
-      phone: "",
-      address: "",
-    }),
-    []
-  );
+import { getInfomationOfUser } from "../../services/Auth";
 
-  const [active, setActive] = useState("general");
+export default function ProfilePage() {
+  const { active, username } = useParams();
+  const navigate = useNavigate(); // ✅ move lên trước
+  const { logout: clearAuth } = useAuth();
+
+  const currentTab = active || "general";
+
+  const [userData, setUserData] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  const handleUser = useCallback(async () => {
+    setLoadingUser(true);
+    try {
+      const data = await getInfomationOfUser();
+      setUserData(data || null);
+    } catch {
+      setUserData(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleUser();
+  }, [handleUser]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await apiLogout();
+    } catch {
+      // ignore
+    } finally {
+      clearAuth?.();
+      navigate("/");
+    }
+  }, [clearAuth, navigate]);
+
+  // ✅ logout phải chạy trong effect, không chạy trong render
+  useEffect(() => {
+    if (currentTab === "logout") {
+      handleLogout();
+    }
+  }, [currentTab, handleLogout]);
+
+  const handleChangeTab = (nextTab) => {
+    navigate(`/profile/${username}/${nextTab}`);
+  };
 
   const renderRight = () => {
-    if (active === "general") return <AccountPanel user={user} />;
+    if (currentTab === "general") return <AccountPanel user={userData} />;
 
-    if (active === "feedback")
-      return <EmptyPanel title="Ý kiến của bạn" desc="(Demo) Nơi hiển thị phản hồi/đóng góp của bạn." />;
+    if (currentTab === "feedback")
+      return (
+        <EmptyPanel
+          title="Ý kiến của tôi"
+          desc="(Demo) Nơi hiển thị phản hồi/đóng góp của bạn."
+        />
+      );
 
-    if (active === "saved") return <SavedNewsPanel allArticles={articles} />;
+    // ✅ Panels tự fetch theo API, không cần allArticles nữa
+    if (currentTab === "saved") return <SavedNewsPanel />;
 
-    if (active === "seen") return <SeenNewsPanel allArticles={articles} />;
+    if (currentTab === "seen") return <SeenNewsPanel />;
 
-    if (active === "logout")
-      return <EmptyPanel title="Thoát" desc="(Demo) Xử lý logout tại đây (xóa token, redirect...)." />;
+    if (currentTab === "logout") {
+      return (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+          Đang đăng xuất...
+        </div>
+      );
+    }
 
     return null;
   };
+
+  if (loadingUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-600">
+        Đang tải thông tin người dùng...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 lg:px-0 py-0 lg:py-0">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <aside className="lg:col-span-4">
-          <ProfileSidebar user={user} active={active} onChange={setActive} />
+          <ProfileSidebar
+            user={userData}
+            active={currentTab}
+            onChange={handleChangeTab}
+          />
         </aside>
 
         <section className="lg:col-span-8">{renderRight()}</section>

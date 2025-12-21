@@ -11,6 +11,8 @@ import ArticlePage from "./components/pages/ArticlePage";
 import ProfilePage from "./components/pages/ProfilePage";
 import ScrollToTop from './components/utils/ScrollToTop'
 import Login from "./components/auth/login/Login";
+import SearchPage from "./components/pages/SearchPage";
+import WeatherDashboardPage from "./components/pages/WeatherDashboardPage";
 
 const App = () => {
   return (
@@ -20,12 +22,14 @@ const App = () => {
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/weather" element={<WeatherDashboardPage />} />
         {/* Bọc các trang bằng MainLayout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/category/:slug/:childSlug" element={<CategoryPage />} />
           <Route path="article/:articleId" element={<ArticlePage />} />
+          <Route path="article/search" element={<SearchPage />} />
 
                   {/* 404 đơn giản */}
           <Route
@@ -40,7 +44,7 @@ const App = () => {
 
               {/* Layout profile: không hero, không category nav */}
       <Route element={<ProfileLayout />}>
-        <Route path="/profile/:username" element={<ProfilePage />} />
+        <Route path="/profile/:username/:active" element={<ProfilePage />} />
       </Route>
       
       </Routes>

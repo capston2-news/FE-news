@@ -1,5 +1,6 @@
 // src/components/layout/Footer.jsx
 import React from "react";
+import logo from "../../assets/newmateai.png";
 
 const Footer = () => {
   return (
@@ -10,14 +11,13 @@ const Footer = () => {
           {/* Logo + menu */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {/* Logo (tạm logo text, có thể đổi sang ảnh) */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-sky-600 flex items-center justify-center text-white font-bold">
-                S
-              </div>
-              <span className="text-xl font-semibold text-slate-900">
-                spiderum
-              </span>
-            </div>
+<div className="h-9 flex items-center">
+  <img
+    src={logo}
+    alt="NEWMATEAI"
+    className="h-9 w-auto object-contain"
+  />
+</div>
 
             {/* Menu */}
             <nav className="flex items-center gap-6 text-[13px] font-semibold tracking-wide text-slate-800 uppercase mt-1">

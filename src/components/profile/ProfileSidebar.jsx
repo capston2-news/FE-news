@@ -17,14 +17,22 @@ function AvatarCircle({ letter = "N" }) {
 }
 
 export default function ProfileSidebar({ user, active, onChange }) {
+
+  const joinDate = user?.created_at;
+
+  const monthYear =
+    joinDate && !Number.isNaN(new Date(joinDate).getTime())
+      ? `${String(new Date(joinDate).getMonth() + 1).padStart(2, "0")}/${new Date(joinDate).getFullYear()}`
+      : "";
+
   return (
     <div className="sticky top-30 space-y-4">
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div className="p-4 flex items-center gap-3 border-b border-slate-200">
-          <AvatarCircle letter={user.avatarLetter} />
+          <AvatarCircle letter={((user?.username || "").trim().charAt(0) || "U").toUpperCase()} />
           <div className="min-w-0">
             <div className="font-semibold text-slate-900 truncate">{user.username}</div>
-            <div className="text-xs text-slate-500">Tham gia từ {user.joinedAt}</div>
+            <div className="text-xs text-slate-500">Tham gia từ {monthYear}</div>
           </div>
         </div>
 
@@ -36,7 +44,7 @@ export default function ProfileSidebar({ user, active, onChange }) {
                 key={item.id}
                 onClick={() => onChange(item.id)}
                 className={
-                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition " +
+                  "w-full flex items-center cursor-pointer justify-between px-3 py-2.5 rounded-xl text-sm transition " +
                   (isActive
                     ? "text-rose-600 bg-rose-50"
                     : "text-slate-700 hover:bg-slate-50")
@@ -73,7 +81,7 @@ export default function ProfileSidebar({ user, active, onChange }) {
           className="mt-1 inline-block text-sm font-semibold text-sky-600 hover:text-sky-700"
           href="mailto:bandoc@vnexpress.net"
         >
-          bandoc@vnexpress.net
+          nguyen27112003dn@gmail.com
         </a>
       </div>
     </div>

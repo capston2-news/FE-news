@@ -5,7 +5,12 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
 // ✅ services (sửa path nếu khác)
-import { getArticlesByCategorySlug, getArticlesByArticleChild } from "../../services/article/ArticleService";
+import {
+  getArticlesByCategorySlug,
+  getArticlesByArticleChild,
+  IncreseArticleViewCount, // ✅ thêm view count giống MainFeed
+} from "../../services/article/ArticleService";
+
 import { getCategoryChildOfCategory } from "../../services/category/Category";
 import { AddBookmark, RemoveBookmark } from "../../services/bookmark/BookmarkService";
 
@@ -13,13 +18,7 @@ const PAGE_SIZE = 20;
 const PAGE_WINDOW = 10;
 const SCROLL_OFFSET = 120;
 
-const TABS = [
-  { id: "for-you", label: "DÀNH CHO BẠN" },
-  { id: "trending", label: "THỊNH HÀNH" },
-  { id: "newest", label: "MỚI" },
-  { id: "hot", label: "SÔI NỔI" },
-  { id: "top", label: "TOP" },
-];
+const TABS = [{ id: "for-you", label: "DÀNH CHO BẠN" }];
 
 const buildPageWindow = (current, total, windowSize = PAGE_WINDOW) => {
   if (total <= 0) return [];
@@ -87,7 +86,14 @@ const normalizeApiArticle = (a) => {
   };
 };
 
-const CategoryArticleCard = ({ article, articleId, onOpenArticle, showBookmark, isBookmarked, onToggleBookmark }) => {
+const CategoryArticleCard = ({
+  article,
+  articleId,
+  onOpenArticle,
+  showBookmark,
+  isBookmarked,
+  onToggleBookmark,
+}) => {
   const {
     title,
     image,
@@ -130,7 +136,10 @@ const CategoryArticleCard = ({ article, articleId, onOpenArticle, showBookmark, 
           title="Xem bài viết"
         >
           <img
-            src={image || "https://images.pexels.com/photos/261949/pexels-photo-261949.jpeg"}
+            src={
+              image ||
+              "https://images.pexels.com/photos/261949/pexels-photo-261949.jpeg"
+            }
             alt={title}
             className="w-full h-[120px] md:h-[140px] object-cover"
           />
@@ -149,7 +158,9 @@ const CategoryArticleCard = ({ article, articleId, onOpenArticle, showBookmark, 
                 {category_name}
               </NavLink>
             ) : (
-              <span className="uppercase font-semibold tracking-wide">{category_name}</span>
+              <span className="uppercase font-semibold tracking-wide">
+                {category_name}
+              </span>
             )}
 
             {category_child_name && category_child_slug && category_slug && (
@@ -246,7 +257,7 @@ const CategoryArticleCard = ({ article, articleId, onOpenArticle, showBookmark, 
           >
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          <span className="text-[12px]">{comments}</span>
+          {/* <span className="text-[12px]">{comments}</span> */}
         </div>
       </div>
     </article>
@@ -258,12 +269,15 @@ const CategoryPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // ✅ open article + tăng view count (giống MainFeed)
   const openArticle = (articleId) => {
     if (!articleId) return;
+
+    // fire-and-forget
+    Promise.resolve(IncreseArticleViewCount(articleId)).catch(() => {});
     navigate(`/article/${articleId}`);
   };
 
-  // ✅ SCROLL_OFFSET giống MainFeed
   const topRef = useRef(null);
   const scrollToTabs = () => {
     const el = topRef.current;
@@ -280,10 +294,8 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
 
-  // ✅ bookmark map giống MainFeed
   const [bookmarkByOid, setBookmarkByOid] = useState({});
 
-  // load child categories (chủ đề con) theo slug
   useEffect(() => {
     const loadChildren = async () => {
       if (!slug) return;
@@ -303,7 +315,6 @@ const CategoryPage = () => {
     loadChildren();
   }, [slug]);
 
-  // load articles theo slug/childSlug (CALL API, không filter)
   useEffect(() => {
     const loadArticles = async () => {
       if (!slug) return;
@@ -314,9 +325,7 @@ const CategoryPage = () => {
       try {
         let res;
         if (childSlug) {
-          // ⚠️ sửa signature cho khớp service của bạn
           res = await getArticlesByArticleChild(slug, childSlug);
-          // nếu service chỉ nhận childSlug => res = await getArticlesByArticleChild(childSlug);
         } else {
           res = await getArticlesByCategorySlug(slug);
         }
@@ -337,7 +346,6 @@ const CategoryPage = () => {
       }
     };
 
-    // reset + scroll giống MainFeed
     setActiveTab("for-you");
     setCurrentPage(1);
     requestAnimationFrame(scrollToTabs);
@@ -346,10 +354,11 @@ const CategoryPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, childSlug]);
 
-  // normalize
-  const baseList = useMemo(() => (articlesApi || []).map(normalizeApiArticle), [articlesApi]);
+  const baseList = useMemo(
+    () => (articlesApi || []).map(normalizeApiArticle),
+    [articlesApi]
+  );
 
-  // init bookmark map từ API (is_bookmarked)
   useEffect(() => {
     if (!baseList.length) return;
     const next = {};
@@ -360,7 +369,6 @@ const CategoryPage = () => {
     setBookmarkByOid(next);
   }, [baseList]);
 
-  // sort theo tab
   const sortedList = useMemo(() => {
     const list = [...baseList];
     switch (activeTab) {
@@ -385,7 +393,6 @@ const CategoryPage = () => {
     }
   }, [baseList, activeTab]);
 
-  // pagination giống MainFeed
   const totalPages = Math.max(1, Math.ceil(sortedList.length / PAGE_SIZE));
 
   useEffect(() => {
@@ -412,7 +419,6 @@ const CategoryPage = () => {
     requestAnimationFrame(scrollToTabs);
   };
 
-  // ✅ toggle bookmark + toast giống MainFeed
   const handleToggleBookmark = async (oid) => {
     if (!oid) return;
 
@@ -443,7 +449,6 @@ const CategoryPage = () => {
     }
   };
 
-  // ✅ title theo category_name / category_child_name (giống yêu cầu bạn)
   const titleText = useMemo(() => {
     const first = baseList?.[0];
     const catName = first?.category_name || "Chuyên mục";
@@ -468,7 +473,6 @@ const CategoryPage = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.4fr)_minmax(240px,1fr)] gap-10">
       <div>
-        {/* ✅ Tabs + SCROLL_OFFSET anchor giống MainFeed */}
         <div
           ref={topRef}
           className="scroll-mt-24 flex items-center justify-between border-b border-slate-200 pb-3"
@@ -497,13 +501,18 @@ const CategoryPage = () => {
         </div>
 
         <div className="flex items-baseline justify-between mt-4">
-          <h2 className="text-lg md:text-xl font-semibold text-slate-900">{titleText}</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-slate-900">
+            {titleText}
+          </h2>
         </div>
 
-        {/* List */}
         <div className="mt-2">
-          {loading && <div className="py-6 text-sm text-slate-500">Đang tải bài viết…</div>}
-          {!loading && errorText && <div className="py-6 text-sm text-rose-600">{errorText}</div>}
+          {loading && (
+            <div className="py-6 text-sm text-slate-500">Đang tải bài viết…</div>
+          )}
+          {!loading && errorText && (
+            <div className="py-6 text-sm text-rose-600">{errorText}</div>
+          )}
 
           {!loading && !errorText && pageArticles.length ? (
             <>
@@ -511,15 +520,14 @@ const CategoryPage = () => {
                 <CategoryArticleCard
                   key={a?.oid || a?.title || `${startIndex + idx}`}
                   article={a}
-                  articleId={a?.oid}              
-                  onOpenArticle={openArticle}   
+                  articleId={a?.oid}
+                  onOpenArticle={openArticle} // ✅ đã có view count trong openArticle
                   showBookmark={!!user}
                   isBookmarked={!!bookmarkByOid[a?.oid]}
                   onToggleBookmark={() => handleToggleBookmark(a?.oid)}
                 />
               ))}
 
-              {/* ✅ Pagination giống MainFeed + Trước/Tiếp = <> */}
               {totalPages > 1 && (
                 <div className="mt-10 flex items-center justify-center gap-8 text-[15px] text-slate-700 select-none">
                   {currentPage > 1 ? (
@@ -545,7 +553,9 @@ const CategoryPage = () => {
                           onClick={() => goToPage(p)}
                           className={
                             "w-10 h-10 grid cursor-pointer place-items-center transition " +
-                            (active ? "bg-sky-500 text-white" : "hover:text-sky-600")
+                            (active
+                              ? "bg-sky-500 text-white"
+                              : "hover:text-sky-600")
                           }
                         >
                           {p}
@@ -580,7 +590,6 @@ const CategoryPage = () => {
         </div>
       </div>
 
-      {/* RIGHT: Chủ đề con + highlight theo route (NavLink) */}
       <aside className="lg:sticky lg:top-28 self-start">
         <div className="px-5 py-4">
           <h3 className="text-sm font-semibold tracking-wide text-slate-900 uppercase mb-4">
@@ -589,7 +598,6 @@ const CategoryPage = () => {
 
           {(childTopics || []).length ? (
             <div className="flex flex-wrap gap-3">
-              {/* Tất cả */}
               <NavLink
                 to={`/category/${slug}`}
                 className={({ isActive }) =>
@@ -604,7 +612,11 @@ const CategoryPage = () => {
 
               {childTopics.map((child) => {
                 const cSlug = child?.category_child_slug || child?.slug || child?.id;
-                const label = child?.category_child_name || child?.name || child?.label || "Chủ đề";
+                const label =
+                  child?.category_child_name ||
+                  child?.name ||
+                  child?.label ||
+                  "Chủ đề";
 
                 return (
                   <NavLink
@@ -623,7 +635,9 @@ const CategoryPage = () => {
               })}
             </div>
           ) : (
-            <p className="text-[13px] text-slate-500">Chưa có chủ đề con cho chuyên mục này.</p>
+            <p className="text-[13px] text-slate-500">
+              Chưa có chủ đề con cho chuyên mục này.
+            </p>
           )}
         </div>
       </aside>

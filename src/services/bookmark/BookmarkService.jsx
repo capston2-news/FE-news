@@ -27,3 +27,16 @@ export const RemoveBookmark = async (articleId) => {
     return null;
   }
 }
+
+export const GetBookmarksOfUser = async () => {
+  try {
+    const res = await axios.get("/api/article/bookmark/", {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch bookmarks of user", error);
+    return [];
+  }
+}

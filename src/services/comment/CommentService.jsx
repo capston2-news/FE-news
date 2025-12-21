@@ -29,3 +29,20 @@ export const getCommentsByArticleId = async (articleId) => {
     return [];
   }
 }
+
+
+export const lookupArticleIdByCommentId = async (commentId) => {
+  try {
+    if (!commentId) return null;
+
+    const res = await axios.get(`/api/comments/${commentId}/lookup-article/`, {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return res.data; // { comment_id, article_id }
+  } catch (error) {
+    console.error("Failed to lookup articleId by commentId", error);
+    return null;
+  }
+};

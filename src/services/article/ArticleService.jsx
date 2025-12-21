@@ -130,3 +130,33 @@ export const textToSpeech = async (text) => {
     return null;
   }
 }
+
+export const searchArticlesByKeyword = async (keyword) => {
+  try {
+    const res = await axios.get(`/api/article/search/?key=${encodeURIComponent(keyword)}`, {
+        withCredentials: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`Failed to search articles with keyword: ${keyword}`, error);
+    return [];
+  }
+}
+
+export const getHistoryArticleOfUser = async () => {
+  try {
+    const res = await axios.get("/api/articles/history/viewed/", {
+        withCredentials: true,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch user's article history", error);
+    return [];
+  }
+}
