@@ -1,52 +1,43 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout";
-import Register from './components/auth/register/Register'
-import ProfileLayout from "./components/layout/ProfileLayout";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Sidebar from "./components/pages/Sidebar";
+import { routes } from "./routes/route";
+import { useAuth } from "../context/AuthContext";
+import "./App.css";
 
-import HomePage from "./components/pages/HomePage";
-import CategoryPage from "./components/pages/CategoryPage";
-import ArticlePage from "./components/pages/ArticlePage";
-import ProfilePage from "./components/pages/ProfilePage";
-import ScrollToTop from './components/utils/ScrollToTop'
-import Login from "./components/auth/login/Login";
+function AppShell() {
+  const { user, booting } = useAuth(); // ✅ cần booting
 
-const App = () => {
+  // ✅ Khi refresh: đợi auth load xong rồi mới render routes (tránh bị redirect sớm)
+  if (booting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-slate-500">
+        Loading…
+      </div>
+    );
+  }
+
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* ✅ chỉ hiện sidebar khi đã login */}
+      {user ? <Sidebar /> : null}
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        {/* Bọc các trang bằng MainLayout */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/category/:slug" element={<CategoryPage />} />
-          <Route path="/category/:slug/:childSlug" element={<CategoryPage />} />
-          <Route path="article/:articleId" element={<ArticlePage />} />
-
-                  {/* 404 đơn giản */}
-          <Route
-            path="*"
-            element={
-              <div className="min-h-screen flex items-center justify-center text-slate-600">
-                Không tìm thấy trang
-              </div>
-            }
-          />
-        </Route>
-
-              {/* Layout profile: không hero, không category nav */}
-      <Route element={<ProfileLayout />}>
-        <Route path="/profile/:username" element={<ProfilePage />} />
-      </Route>
-      
-      </Routes>
-
-    </BrowserRouter>
+      <div className="flex-1 min-w-0 relative overflow-x-hidden">
+        <Routes>
+          {routes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </div>
+    </div>
   );
-};
+}
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppShell />
+    </Router>
+  );
+}

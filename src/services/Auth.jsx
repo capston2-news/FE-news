@@ -55,3 +55,18 @@ export const registerApi = async (payload) => {
     return { ok: false, status: 0, detail: "Network error" };
   }
 };
+
+export const getInfomationOfUser = async () => {
+  try {
+    const res = await axios.get("/api/auth/me/", {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Get user info failed", error);
+    return null;
+  }
+};

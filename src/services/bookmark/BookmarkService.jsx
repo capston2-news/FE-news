@@ -1,29 +1,18 @@
 import axios from "axios";
 
-export const AddBookmark = async (articleId) => {
-  try {
-    const res = await axios.post(`/api/bookmark/articles/user/${articleId}`,
-    {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Failed to add bookmark", error);
-    return null;
-  }
-}
-
-export const RemoveBookmark = async (articleId) => {
-  try {
-    const res = await axios.delete(`/api/bookmark/articles/user/${articleId}`,
-    {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Failed to remove bookmark", error);
-    return null;
-  }
-}
+export const getBookmarksByUserId  = async (customerId) => {
+    // Axios trả về response object, data thực sự nằm trong response.data
+    try {
+        const res = await axios.get(`/api/admin/users/${customerId}/bookmarks/`, {
+            withCredentials: true,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        console.log(res.data);
+        return res.data;
+    } catch (error) {
+        console.error("Failed to fetch all articles", error);
+        return [];
+    }
+};

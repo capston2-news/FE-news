@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { login } from "../../../services/Auth";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../../context/AuthContext";
+
+const ALLOWED_ROLES = ["admin", "employee"];
 
 export default function Login() {
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
+
   const [account, setAccount] = useState({
     username: "",
     password: "",
@@ -18,48 +21,70 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setAccount((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setAccount((prev) => ({ ...prev, [name]: value }));
 
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+    // clear field error + loginError khi user sửa
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setLoginError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginError("");
 
+    // validate
     const newErrors = {};
-
-    if (!account.username.trim()) {
-      newErrors.username = "Username không được để trống";
-    }
-
-    if (!account.password.trim()) {
-      newErrors.password = "Mật khẩu không được để trống";
-    }
+    if (!account.username.trim()) newErrors.username = "Username không được để trống";
+    if (!account.password.trim()) newErrors.password = "Mật khẩu không được để trống";
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setErrors((prev) => ({ ...prev, ...newErrors }));
       return;
     }
 
-    const data = await login(account);
-    if (!data || data.message !== "ok") {
-      setLoginError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
-      return;
-    }
+    try {
+      setSubmitting(true);
 
-    // Lưu user vào context + localStorage
-    setAuthUser(data);
-    navigate("/");
+      const data = await login(account);
+
+      // ✅ check response
+      if (!data || data.message !== "ok") {
+        setLoginError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+        return;
+      }
+
+      // ✅ LẤY ROLE (tuỳ BE trả role ở đâu)
+      const role = data.role || data?.user?.role;
+
+      // ✅ chặn role
+      if (!ALLOWED_ROLES.includes(role)) {
+        setLoginError("Bạn không có quyền đăng nhập");
+        return;
+      }
+
+      // ✅ Lưu vào context + localStorage (AuthContext sẽ setItem)
+      setAuthUser({
+        ...data,
+        role, // đảm bảo role đúng field
+      });
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      // nếu BE trả lỗi dạng axios: err.response?.data?.detail...
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.";
+      setLoginError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,8 +113,7 @@ export default function Login() {
                 Breaking • 5 phút trước
               </p>
               <p className="text-sm font-semibold">
-                Thị trường chứng khoán châu Á bật tăng sau tin cắt giảm lãi
-                suất.
+                Thị trường chứng khoán châu Á bật tăng sau tin cắt giảm lãi suất.
               </p>
             </div>
 
@@ -98,8 +122,7 @@ export default function Login() {
                 Thể thao • 15 phút trước
               </p>
               <p className="text-sm font-semibold">
-                Đội tuyển quốc gia chuẩn bị cho vòng loại World Cup với lực
-                lượng trẻ.
+                Đội tuyển quốc gia chuẩn bị cho vòng loại World Cup với lực lượng trẻ.
               </p>
             </div>
           </div>
@@ -132,8 +155,7 @@ export default function Login() {
               Chào mừng trở lại 👋
             </h2>
             <p className="text-sm text-slate-500 mt-2">
-              Đăng nhập để tiếp tục đọc những câu chuyện đang định hình thế
-              giới.
+              Đăng nhập để tiếp tục đọc những câu chuyện đang định hình thế giới.
             </p>
           </div>
 
@@ -165,16 +187,14 @@ export default function Login() {
               )}
             </div>
 
-            {/* PASSWORD + EYE ICON */}
+            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label
-                  htmlFor="login-password"
-                  className="block text-sm font-medium text-slate-800"
-                >
-                  Mật khẩu
-                </label>
-              </div>
+              <label
+                htmlFor="login-password"
+                className="block text-sm font-medium text-slate-800 mb-2"
+              >
+                Mật khẩu
+              </label>
 
               <div className="relative">
                 <input
@@ -183,16 +203,15 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   className={`w-full rounded-2xl bg-slate-50 border px-4 py-3 pr-14 text-base outline-none transition focus:ring-2
-        ${
-          errors.password
-            ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-            : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-200"
-        }`}
+                    ${
+                      errors.password
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                        : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-200"
+                    }`}
                   value={account.password}
                   onChange={handleChange}
                 />
 
-                {/* CHỈ HIỆN KHI CÓ DỮ LIỆU */}
                 {account.password && (
                   <button
                     type="button"
@@ -202,7 +221,6 @@ export default function Login() {
                   >
                     <span>
                       {showPassword ? (
-                        // eye-off (to hơn)
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
@@ -218,7 +236,6 @@ export default function Login() {
                           />
                         </svg>
                       ) : (
-                        // eye-on (to hơn)
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
@@ -245,7 +262,7 @@ export default function Login() {
               )}
             </div>
 
-            {/* REMEMBER + LINK TO REGISTER */}
+            {/* remember + register link */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
@@ -265,22 +282,22 @@ export default function Login() {
               </span>
             </div>
 
-            {/* LOGIN BUTTON */}
             <button
               type="submit"
-              className="w-full mt-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 text-base transition shadow-md"
+              disabled={submitting}
+              className={`w-full mt-2 rounded-2xl text-white font-semibold py-3 text-base transition shadow-md
+                ${submitting ? "bg-emerald-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500"}`}
             >
-              Đăng nhập
+              {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
           {loginError && (
-            <p className="text-base text-red-500 text-center">{loginError}</p>
+            <p className="mt-4 text-sm text-red-500 text-center">{loginError}</p>
           )}
 
           <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-            Bằng việc tiếp tục, bạn đồng ý với điều khoản và chính sách của
-            NewsPulse.
+            Bằng việc tiếp tục, bạn đồng ý với điều khoản và chính sách của NewsPulse.
           </p>
         </div>
       </div>
