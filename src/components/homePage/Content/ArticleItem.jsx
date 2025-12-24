@@ -2,23 +2,22 @@ import React from 'react';
 
 const ArticleItem = ({ title, image }) => {
     return (
-        <article className=" overflow-hidden  pb-4">
-            {image ? (
-                <div className="flex items-start space-x-4">
+        <article className="flex items-start gap-3 pb-4 group">
+            {image && (
+                <div className="relative overflow-hidden rounded flex-shrink-0 w-28 h-20 bg-gray-100">
                     <img
                         src={image}
                         alt={title}
-                        className="w-62 h-42 object-cover flex-shrink-0"
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     />
-                    <div>
-                        <h3 className="font-semibold text-gray-800 leading-tight">{title}</h3>
-                    </div>
-                </div>
-            ) : (
-                <div>
-                    <h3 className="font-semibold text-gray-800 leading-tight">{title}</h3>
                 </div>
             )}
+            <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-gray-900 leading-tight group-hover:text-red-600 transition cursor-pointer line-clamp-2">
+                    {title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">1 giờ trước</p>
+            </div>
         </article>
     );
 };

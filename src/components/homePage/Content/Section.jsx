@@ -8,37 +8,40 @@ const Section = ({ id, title, image, summary }) => {
     };
 
     return (
-        <article className="bg-white overflow-hidden border-b border-gray-200 pb-4">
-            {/* Title clickable */}
-            <h3
-                onClick={handleClick}
-                className="font-semibold text-lg text-gray-800 leading-tight text-left mb-2 cursor-pointer
-                           hover:text-gray-400 transition-colors duration-200"
-            >
-                {title}
-            </h3>
-
-            <div className="flex items-start space-x-4">
-                {/* Image clickable */}
+        <article className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition shadow-sm group">
+            <div className="flex flex-col h-full">
+                {/* Image */}
                 {image && (
-                    <img
-                        onClick={handleClick}
-                        src={image}
-                        alt={title}
-                        className="w-48 h-32 object-cover flex-shrink-0 cursor-pointer"
-                    />
+                    <div className="relative overflow-hidden h-48 bg-gray-100">
+                        <img
+                            onClick={handleClick}
+                            src={image}
+                            alt={title}
+                            className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300"
+                        />
+                    </div>
                 )}
 
-                <div>
-                    {/* Summary clickable */}
+                {/* Content */}
+                <div className="p-4 flex flex-col flex-grow">
+                    <h3
+                        onClick={handleClick}
+                        className="font-bold text-base text-gray-900 leading-tight mb-2 cursor-pointer
+                                   group-hover:text-red-600 transition-colors duration-200 line-clamp-3"
+                    >
+                        {title}
+                    </h3>
+
                     {summary && (
                         <p
                             onClick={handleClick}
-                            className="mt-0 text-sm text-gray-900 text-left cursor-pointer"
+                            className="text-sm text-gray-600 leading-relaxed cursor-pointer flex-grow mb-2 line-clamp-2"
                         >
                             {summary}
                         </p>
                     )}
+
+                    <span className="text-xs text-gray-500">2 phút trước</span>
                 </div>
             </div>
         </article>

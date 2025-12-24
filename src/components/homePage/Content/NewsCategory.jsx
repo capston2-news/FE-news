@@ -10,51 +10,82 @@ const adComponents = {
 
 const NewsCategory = ({ title, categories, mainArticle, bulletPoints, adComponent }) => {
     return (
-        <div className="md:col-span-2 space-y-6 pl-1 border-t border-gray-200 pt-5">
-            <div className="flex items-center space-x-4 pb-0">
-                <h2 className="text-2xl font-semibold underline decoration-gray-50 underline-offset-6">{title}</h2>
-                <div className="flex space-x-2 text-base text-gray-500">
-                    {categories.map((cat, index) => (
-                        <span key={index}>{cat}</span>
+        <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+            {/* Header */}
+            <div className="border-b-4 border-red-600 p-4 bg-gray-50">
+                <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {categories.slice(0, 6).map((cat, index) => (
+                        <a 
+                            key={index}
+                            href="#" 
+                            className="text-sm text-gray-600 hover:text-red-600 transition font-medium"
+                        >
+                            {cat}
+                            {index < 5 && <span className="mx-2 text-gray-300">|</span>}
+                        </a>
                     ))}
                 </div>
             </div>
 
-            <div className="flex space-x-5">
-                <div className="w-3/4 flex space-x-4 border-r border-gray-300 pr-3">
-                    <img
-                        src={mainArticle.image}
-                        alt={mainArticle.headline}
-                        className="w-66 h-40 object-cover"
-                    />
-                    <div className="w-1/2 ">
-                        <h3 className="font-semibold text-lg leading-tight text-left">{mainArticle.headline}</h3>
-                        <p className="mt-2 text-sm text-left text-gray-600">
-                            {mainArticle.summary}
-                        </p>
+            {/* Main Article */}
+            <div className="p-4 border-b border-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                        <img
+                            src={mainArticle.image}
+                            alt={mainArticle.headline}
+                            className="w-full h-64 object-cover rounded"
+                        />
+                    </div>
+                    <div className="md:col-span-1 flex flex-col justify-between">
+                        <div>
+                            <h3 className="font-bold text-lg text-gray-900 leading-tight mb-3 hover:text-red-600 cursor-pointer transition">
+                                {mainArticle.headline}
+                            </h3>
+                            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                                {mainArticle.summary}
+                            </p>
+                        </div>
+                        <span className="text-xs text-gray-500">2 phút trước</span>
                     </div>
                 </div>
-
-                <div className="w-1/3 text-left">
-                    <h3 className="font-semibold text-lg leading-tight">{mainArticle.subHeadline}</h3>
-                    <p className="mt-2 text-sm text-gray-600">
-                        {mainArticle.subSummary}
-                    </p>
-                </div>
             </div>
 
-            <div className="space-y-4 border-t border-gray-200 pt-6 border-b pb-6 text-left">
-                <div className="flex space-x-12">
+            {/* Sub Article */}
+            <div className="p-4 border-b border-gray-100">
+                <h3 className="font-bold text-base text-gray-900 leading-tight mb-2 hover:text-red-600 cursor-pointer transition">
+                    {mainArticle.subHeadline}
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                    {mainArticle.subSummary}
+                </p>
+                <p className="text-xs text-gray-500 mt-2">1 giờ trước</p>
+            </div>
+
+            {/* Bullet Points */}
+            <div className="p-4 border-b border-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {bulletPoints.map((point, index) => (
-                        <ul key={index} className="w-1/3 list-disc pl-5">
-                            <li><a href="#" className="text-black hover:underline">{point}</a></li>
-                        </ul>
+                        <a 
+                            key={index}
+                            href="#" 
+                            className="text-sm text-gray-700 hover:text-red-600 transition leading-relaxed"
+                        >
+                            • {point}
+                        </a>
                     ))}
                 </div>
             </div>
 
-            {/* Logic để hiển thị component tương ứng */}
-            {adComponent && adComponents[adComponent]}
+            {/* Ad Component */}
+            {adComponent && (
+                <div className="p-4 bg-gray-50 border-t border-gray-100">
+                    {adComponents[adComponent]}
+                </div>
+            )}
         </div>
     );
 };

@@ -12,6 +12,7 @@ import { getArticleExpectArticleId } from "../../services/article/Article.jsx";
 import Loading from "../utils/Loading.jsx";
 
 function Article(){
+    const [a, setA] = useState();
     // const mainArticles = [
     //     {
     //         image: "https://i1-vnexpress.vnecdn.net/2025/10/13/ttg1-16674742319591431933173-1-9916-1998-1760312794.jpg?w=180&h=108&q=100&dpr=2&fit=crop&s=UPjQKsOh6GdQrKVWZgDoIA",

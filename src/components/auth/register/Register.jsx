@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { registerApi } from "../../../services/Auth";
 
 function calcAgeFromDob(dobStr) {
+  const [a, setA] = useState();
   const dob = new Date(dobStr);
   if (Number.isNaN(dob.getTime())) return null;
 

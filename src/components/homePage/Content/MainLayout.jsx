@@ -142,52 +142,121 @@ const MainLayout = () => {
     }
 
     return (
-            <main className="container max-w-7xl px-2 py-6 mt-24 mx-auto">
-                <Header/>
-                <div className="grid grid-cols-4 gap-6 pt-4">
-                    <div className="col-span-3">
-                        <NewsSection/>
-                    </div>
-                    <div className="col-span-1">
-                        <AdSection/>
-                    </div>
-                </div>
+            <main className="container max-w-7xl px-2 py-4 mt-24 mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {/* MAIN CONTENT - 2.5 columns */}
+                    <div className="lg:col-span-3 space-y-6">
+                        {/* Featured Article */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+                            {newsSections[0]?.mainArticle && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+                                    <div className="md:col-span-2">
+                                        <img 
+                                            src={newsSections[0].mainArticle.image} 
+                                            alt="featured"
+                                            className="w-full h-64 object-cover rounded"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-1 flex flex-col justify-between">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-gray-900 mb-3 leading-tight hover:text-red-600 cursor-pointer transition">
+                                                {newsSections[0].mainArticle.headline}
+                                            </h2>
+                                            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                                                {newsSections[0].mainArticle.summary}
+                                            </p>
+                                        </div>
+                                        <span className="text-xs text-gray-500">2 phút trước</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-1 space-y-6 md:border-r md:pr-6 border-gray-200">
-                        {articles.slice(0, 12).map((article, index) => (
-                            
+                        {/* News Sections */}
+                        <div className="space-y-6">
+                            {newsSections.map((section, index) => (
+                                <NewsCategory
+                                    key={index}
+                                    title={section.title}
+                                    categories={section.categories}
+                                    mainArticle={section.mainArticle}
+                                    bulletPoints={section.bulletPoints}
+                                    adComponent={section.adComponent}
+                                />
+                            ))}
+                        </div>
+
+                        {/* More Articles */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {articles.slice(0, 8).map((article, index) => (
                                 <Section
+                                    key={article._id.$oid}
                                     title={article?.title}
                                     image={article?.images}
                                     summary={firstSentence(article.content)}
                                     id={String(article._id.$oid)}
                                 />
-                           
-                        ))}
-
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Cột 2: Danh mục tin tức được render từ dữ liệu */}
-                    <div className="md:col-span-2 space-y-6">
-                        {newsSections.map((section, index) => (
-                            <NewsCategory
-                                key={index}
-                                title={section.title}
-                                categories={section.categories}
-                                mainArticle={section.mainArticle}
-                                bulletPoints={section.bulletPoints}
-                                adComponent={section.adComponent} // Truyền thuộc tính mới
-                            />
-                        ))}
+                    {/* SIDEBAR - 1.5 columns */}
+                    <div className="lg:col-span-1 space-y-4">
+                        {/* Trending Widget */}
+                        <div className="bg-white rounded-lg p-4 shadow-sm">
+                            <h3 className="font-bold text-gray-900 mb-3 pb-2 border-b-2 border-red-600">
+                                XEM NHIỀU NHẤT
+                            </h3>
+                            <div className="space-y-3">
+                                {articles.slice(0, 5).map((article, i) => (
+                                    <a
+                                        key={article._id.$oid}
+                                        href={`/article/${article._id.$oid}`}
+                                        className="flex gap-2 group"
+                                    >
+                                        <span className="text-lg font-bold text-gray-300 flex-shrink-0 mt-0.5">{i + 1}</span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900 group-hover:text-red-600 line-clamp-2 transition">
+                                                {article.title}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">{article.category || 'Tin tức'}</p>
+                                        </div>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
 
+                        {/* Ad Section */}
+                        <AdSection/>
+
+                        {/* Latest News Widget */}
+                        <div className="bg-white rounded-lg p-4 shadow-sm">
+                            <h3 className="font-bold text-gray-900 mb-3 pb-2 border-b-2 border-red-600">
+                                TIN MỚI NHẤT
+                            </h3>
+                            <div className="space-y-3">
+                                {articles.slice(5, 10).map((article) => (
+                                    <a
+                                        key={article._id.$oid}
+                                        href={`/article/${article._id.$oid}`}
+                                        className="block group"
+                                    >
+                                        <p className="text-sm font-semibold text-gray-900 group-hover:text-red-600 line-clamp-2 transition">
+                                            {article.title}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleString('vi-VN')}</p>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-               <div className="mt-6">
+                {/* Science Section */}
+                <div className="mt-8">
                    <Navbar/>
                    <MainContent/>
-               </div>
+                </div>
 <Footer/>
             </main>
 

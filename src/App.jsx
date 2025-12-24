@@ -12,7 +12,7 @@ import ScrollToTop from './components/utils/ScrollToTop'
 import Loading from './components/utils/Loading'
 
 function App() {
-
+  const [a, setA] = useState();
   return (
     <>
       <BrowserRouter>

@@ -4,6 +4,7 @@ import { login } from "../../../services/Auth";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function Login() {
+  const [a, setA] = useState();
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
   const [account, setAccount] = useState({

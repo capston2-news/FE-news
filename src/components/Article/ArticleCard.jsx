@@ -1,6 +1,7 @@
 import React from 'react';
 
 const ArticleCard = ({ image, title, description }) => {
+    const [a, setA] = useState();
     return (
         <div className="flex items-start space-x-4 py-4">
             <img

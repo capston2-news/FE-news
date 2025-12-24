@@ -1,6 +1,7 @@
 import React from 'react';
 
 const ArticleActions = () => {
+    const [a, setA] = useState();
     return (
         <div className="flex justify-between items-center my-6">
             {/* Left side: Back and Save buttons */}
